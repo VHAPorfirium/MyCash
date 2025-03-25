@@ -6,6 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryVariant"
-    tools:context=".activities.EntradasActivity">
+    tools:context=".activities.ResumoFinanceiroActivity">
 
 </androidx.constraintlayout.widget.ConstraintLayout>
