@@ -13,8 +13,16 @@ import java.util.List;
 public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.ViewHolder> {
 
     private List<Transacao> transacaoList;
+    private OnItemClickListener listener;
 
-    // Construtor recebe a lista de transações
+    public interface OnItemClickListener {
+        void onItemClick(Transacao transacao);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
     public TransacaoAdapter(List<Transacao> transacaoList) {
         this.transacaoList = transacaoList;
     }
@@ -22,7 +30,6 @@ public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Infla o layout do item
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_transacao, parent, false);
         return new ViewHolder(view);
@@ -30,25 +37,25 @@ public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Pega o objeto Transacao pela posição
         Transacao transacao = transacaoList.get(position);
-
-        // Define os valores nas views
         holder.tvDescricao.setText(transacao.getDescricao());
         holder.tvValor.setText("R$ " + transacao.getValor());
         holder.tvTipo.setText(transacao.getTipo());
+
+        holder.itemView.setOnClickListener(v -> {
+            if(listener != null) {
+                listener.onItemClick(transacao);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        // Retorna o tamanho da lista
         return transacaoList.size();
     }
 
-    // ViewHolder interno para gerenciar as views de cada item
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvDescricao, tvValor, tvTipo;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDescricao = itemView.findViewById(R.id.tvDescricao);
