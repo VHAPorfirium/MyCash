@@ -90,41 +90,84 @@
 
         <!-- Layout interno do CardView -->
         <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="16dp"
             android:orientation="vertical"
-            android:gravity="center"
-            android:padding="16dp">
+            android:gravity="center_horizontal">
 
+            <!-- Título "Gastos:" centralizado -->
             <TextView
-                android:layout_width="359dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:text="Gastos:"
-                android:textColor="@color/black"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
 
-            <!-- Exibição do valor do Crédito -->
-            <TextView
-                android:id="@+id/tvCredito"
+            <!-- Container horizontal para as duas colunas -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Crédito: R$ 0,00"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:layout_marginBottom="4dp" />
+                android:orientation="horizontal"
+                android:gravity="center">
 
-            <!-- Exibição do valor do Débito -->
-            <TextView
-                android:id="@+id/tvDebito"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Débito: R$ 0,00"
-                android:textSize="18sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="8dp"/>
+                <!-- Coluna da esquerda: Entradas e Saídas -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Entradas: R$ 0,00"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Saídas: R$ 0,00"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+
+                <!-- Espaço entre as colunas -->
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content" />
+
+                <!-- Coluna da direita: Crédito e Débito -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvCredito"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Crédito: R$ 0,00"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvDebito"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Débito: R$ 0,00"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
