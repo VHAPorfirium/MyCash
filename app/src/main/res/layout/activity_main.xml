@@ -11,7 +11,7 @@
     <!-- Título do App no Topo -->
     <TextView
         android:id="@+id/tvAppTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="MyCash"
         android:textSize="28sp"
@@ -19,66 +19,37 @@
         android:textColor="@color/black"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5" />
 
-    <!-- GridLayout com os 6 botões redondos -->
+    <!-- GridLayout com os 3 botões redondos -->
     <GridLayout
         android:id="@+id/gridRoundButtons"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:columnCount="3"
-        android:rowCount="2"
-        android:layout_marginTop="24dp"
+        android:rowCount="1"
+        android:layout_marginTop="30dp"
         app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Botão: Entradas/Saídas -->
+        <!-- Botão: Entradas -->
         <Button
-            android:id="@+id/btnEntradasSaidas"
+            android:id="@+id/btnEntradas"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:text="Entradas/Saídas"
+            android:text="Entradas"
             android:textSize="12sp"
             android:background="@drawable/round_button"
             android:layout_margin="8dp"/>
 
-        <!-- Botão: Gastos Fixos -->
+        <!-- Botão: Saídas -->
         <Button
-            android:id="@+id/btnGastosFixos"
+            android:id="@+id/btnSaidas"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:text="Gastos Fixos"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-        <!-- Botão: Gastos Variados -->
-        <Button
-            android:id="@+id/btnGastosVariados"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Gastos Variados"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-        <!-- Botão: Crédito -->
-        <Button
-            android:id="@+id/btnCredito"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Crédito"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-        <!-- Botão: Débito -->
-        <Button
-            android:id="@+id/btnDebito"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Débito"
+            android:text="Saídas"
             android:textSize="12sp"
             android:background="@drawable/round_button"
             android:layout_margin="8dp"/>
@@ -97,23 +68,23 @@
 
     <!-- Botão Visualizar Estrutura Financeira -->
     <Button
-        android:id="@+id/btnVisualizarEstrutura"
-        android:layout_width="0dp"
+        android:id="@+id/btnEstruturaFinanceira"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Visualizar Estrutura Financeira"
-        android:layout_marginTop="24dp"
+        android:text="Estrutura Financeira"
+        android:layout_marginTop="30dp"
         app:layout_constraintTop_toBottomOf="@id/gridRoundButtons"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- CardView para exibir Crédito e Débito (layout do cartão de crédito) -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardCreditoDebito"
+        android:id="@+id/cardGastos"
         android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="50dp"
         app:cardCornerRadius="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnVisualizarEstrutura"
+        app:layout_constraintTop_toBottomOf="@id/btnEstruturaFinanceira"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -122,6 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:gravity="center"
             android:padding="16dp">
 
             <TextView
@@ -159,11 +131,11 @@
     <!-- Botão Resumo Financeiro, fixado na parte inferior -->
     <Button
         android:id="@+id/btnResumoFinanceiro"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Resumo Financeiro"
         android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/cardCreditoDebito"
+        app:layout_constraintTop_toBottomOf="@id/cardGastos"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
