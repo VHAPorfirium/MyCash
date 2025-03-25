@@ -1,19 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity">
+    android:padding="16dp"
+    android:background="@color/colorPrimaryVariant">
 
+    <!-- Título do App no Topo -->
     <TextView
+        android:id="@+id/tvAppTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="MyCash"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- GridLayout com os 6 botões redondos -->
+    <GridLayout
+        android:id="@+id/gridRoundButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="2"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Botão: Entradas/Saídas -->
+        <Button
+            android:id="@+id/btnEntradasSaidas"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Entradas/Saídas"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+        <!-- Botão: Gastos Fixos -->
+        <Button
+            android:id="@+id/btnGastosFixos"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Gastos Fixos"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+        <!-- Botão: Gastos Variados -->
+        <Button
+            android:id="@+id/btnGastosVariados"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Gastos Variados"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+        <!-- Botão: Crédito -->
+        <Button
+            android:id="@+id/btnCredito"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Crédito"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+        <!-- Botão: Débito -->
+        <Button
+            android:id="@+id/btnDebito"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Débito"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+        <!-- Botão: A Pagar -->
+        <Button
+            android:id="@+id/btnAPagar"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="A Pagar"
+            android:textSize="12sp"
+            android:background="@drawable/round_button"
+            android:layout_margin="8dp"/>
+
+    </GridLayout>
+
+    <!-- Botão Visualizar Estrutura Financeira -->
+    <Button
+        android:id="@+id/btnVisualizarEstrutura"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Visualizar Estrutura Financeira"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/gridRoundButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- CardView para exibir Crédito e Débito (layout do cartão de crédito) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardCreditoDebito"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnVisualizarEstrutura"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Layout interno do CardView -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="359dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Gastos:"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Exibição do valor do Crédito -->
+            <TextView
+                android:id="@+id/tvCredito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Crédito: R$ 0,00"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Exibição do valor do Débito -->
+            <TextView
+                android:id="@+id/tvDebito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Débito: R$ 0,00"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Botão Resumo Financeiro, fixado na parte inferior -->
+    <Button
+        android:id="@+id/btnResumoFinanceiro"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Resumo Financeiro"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/cardCreditoDebito"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
