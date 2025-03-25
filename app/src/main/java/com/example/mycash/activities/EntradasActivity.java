@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.mycash.R;
 import com.example.mycash.adapter.TransacaoAdapter;
-import com.example.mycash.model.Transacao;
 import com.example.mycash.database.TransacaoRepository;
+import com.example.mycash.model.Transacao;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -32,54 +32,42 @@ public class EntradasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_entradas);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        // Configura os insets (assegure que o root view do layout tenha id="main")
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            return windowInsets;
         });
 
         btnAdicionarEntrada = findViewById(R.id.btnAdicionarEntrada);
         rvUltimasEntradas = findViewById(R.id.rvUltimasEntradas);
 
-        // Carrega a lista de transações do mês atual
         transacoes = carregarTransacoesDoMesAtual();
 
-        // Configura RecyclerView
         adapter = new TransacaoAdapter(transacoes);
         rvUltimasEntradas.setLayoutManager(new LinearLayoutManager(this));
         rvUltimasEntradas.setAdapter(adapter);
 
-        // Configura clique para abrir popup de opções na transação
         adapter.setOnItemClickListener(transacao -> {
             showOptionsDialog(transacao);
         });
 
-        // Configura clique do botão para abrir a tela de Adicionar Entrada
         btnAdicionarEntrada.setOnClickListener(view -> {
             Intent intent = new Intent(EntradasActivity.this, AdicionarEntradaActivity.class);
             startActivity(intent);
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Atualiza a lista de transações ao retornar da tela de cadastro ou edição
-        transacoes = carregarTransacoesDoMesAtual();
-        adapter = new TransacaoAdapter(transacoes);
-        rvUltimasEntradas.setAdapter(adapter);
-        adapter.setOnItemClickListener(t -> showOptionsDialog(t));
-    }
-
     private List<Transacao> carregarTransacoesDoMesAtual() {
         List<Transacao> lista = new ArrayList<>();
-        List<Transacao> todasTransacoes = TransacaoRepository.getTransacoes();
         Calendar cal = Calendar.getInstance();
         int mesAtual = cal.get(Calendar.MONTH);
-        for (Transacao t : todasTransacoes) {
+        for (Transacao t : TransacaoRepository.getTransacoes()) {
             Calendar calTransacao = Calendar.getInstance();
             calTransacao.setTime(t.getData());
-            if (calTransacao.get(Calendar.MONTH) == mesAtual) {
+            // Filtra somente transações do mês atual com tipo "Entrada"
+            if (calTransacao.get(Calendar.MONTH) == mesAtual && "Entrada".equalsIgnoreCase(t.getTipo())) {
                 lista.add(t);
             }
         }
@@ -88,7 +76,7 @@ public class EntradasActivity extends AppCompatActivity {
 
     private void showOptionsDialog(final Transacao transacao) {
         String[] options = {"Editar", "Excluir", "Cancelar"};
-        new MaterialAlertDialogBuilder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Opções")
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
@@ -100,7 +88,7 @@ public class EntradasActivity extends AppCompatActivity {
                         case 1: // Excluir
                             excluirTransacao(transacao);
                             break;
-                        case 2: // Cancelar
+                        case 2:
                             dialog.dismiss();
                             break;
                     }
@@ -111,7 +99,15 @@ public class EntradasActivity extends AppCompatActivity {
     private void excluirTransacao(Transacao transacao) {
         TransacaoRepository.removeTransacao(transacao);
         Toast.makeText(this, "Transação excluída", Toast.LENGTH_SHORT).show();
-        // Atualiza a lista
+        transacoes = carregarTransacoesDoMesAtual();
+        adapter = new TransacaoAdapter(transacoes);
+        rvUltimasEntradas.setAdapter(adapter);
+        adapter.setOnItemClickListener(t -> showOptionsDialog(t));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         transacoes = carregarTransacoesDoMesAtual();
         adapter = new TransacaoAdapter(transacoes);
         rvUltimasEntradas.setAdapter(adapter);

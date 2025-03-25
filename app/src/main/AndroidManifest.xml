@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mycash">
 
@@ -13,42 +14,57 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyCash"
         tools:targetApi="31">
+
+        <!-- Tela Principal (exported = true) -->
+        <activity
+            android:name=".activities.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Activities de Entradas -->
+        <activity
+            android:name=".activities.EntradasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AdicionarEntradaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.EditarEntradaActivity"
+            android:exported="false" />
+
+        <!-- Activities de Saídas -->
+        <activity
+            android:name=".activities.SaidasActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.AdicionarSaidaActivity"
             android:exported="false" />
         <activity
             android:name=".activities.EditarSaidaActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.EditarEntradaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.AdicionarEntradaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.ResumoFinanceiroActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.EstruturaFinanceiraActivity"
-            android:exported="false" />
+
+        <!-- Activities de "A Pagar" -->
         <activity
             android:name=".activities.APagarActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.SaidasActivity"
+            android:name=".activities.AdicionarAPagarActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.EntradasActivity"
+            android:name=".activities.EditarAPagarActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!-- Demais Activities -->
+        <activity
+            android:name=".activities.EstruturaFinanceiraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ResumoFinanceiroActivity"
+            android:exported="false" />
+
     </application>
-
 </manifest>
