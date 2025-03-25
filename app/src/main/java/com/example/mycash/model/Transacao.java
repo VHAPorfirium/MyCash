@@ -16,7 +16,7 @@ public class Transacao {
         this.tipo = tipo;
         this.data = data;
     }
-    
+
     public int getId() {
         return id;
     }
