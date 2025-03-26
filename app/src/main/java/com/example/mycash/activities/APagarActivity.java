@@ -33,10 +33,10 @@ public class APagarActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_apagar);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
-            return windowInsets;
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
 
         btnAdicionarAPagar = findViewById(R.id.btnAdicionarAPagar);
@@ -48,9 +48,7 @@ public class APagarActivity extends AppCompatActivity {
         rvAPagar.setLayoutManager(new LinearLayoutManager(this));
         rvAPagar.setAdapter(adapter);
 
-        adapter.setOnItemClickListener(transacao -> {
-            showOptionsDialog(transacao);
-        });
+        adapter.setOnItemClickListener(transacao -> showOptionsDialog(transacao));
 
         btnAdicionarAPagar.setOnClickListener(view -> {
             Intent intent = new Intent(APagarActivity.this, AdicionarAPagarActivity.class);
@@ -72,23 +70,19 @@ public class APagarActivity extends AppCompatActivity {
         return lista;
     }
 
-    private void showOptionsDialog(final Transacao transacao) {
+    private void showOptionsDialog(Transacao transacao) {
         String[] options = {"Editar", "Excluir", "Cancelar"};
         new AlertDialog.Builder(this)
                 .setTitle("Opções A Pagar")
                 .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            Intent intent = new Intent(APagarActivity.this, EditarAPagarActivity.class);
-                            intent.putExtra("transacao_id", transacao.getId());
-                            startActivity(intent);
-                            break;
-                        case 1:
-                            excluirAPagar(transacao);
-                            break;
-                        case 2:
-                            dialog.dismiss();
-                            break;
+                    if (which == 0) {
+                        Intent intent = new Intent(APagarActivity.this, EditarAPagarActivity.class);
+                        intent.putExtra("transacao_id", transacao.getId());
+                        startActivity(intent);
+                    } else if (which == 1) {
+                        excluirAPagar(transacao);
+                    } else {
+                        dialog.dismiss();
                     }
                 })
                 .show();

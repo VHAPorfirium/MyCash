@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -51,34 +52,14 @@ public class AdicionarEntradaActivity extends AppCompatActivity {
         etTipo.setText("Entrada");
         etTipo.setEnabled(false);
 
+        // Define a data atual como padrão
+        etData.setText(sdf.format(new Date()));
+
         // Configura o campo de data para abrir um DatePickerDialog ao clicar
-        etData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog();
-            }
-        });
+        etData.setOnClickListener(view -> showDatePickerDialog());
 
         // Configura o clique do botão Salvar
-        btnSalvarEntrada.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String descricao = etDescricao.getText().toString();
-                double valor = Double.parseDouble(etValor.getText().toString());
-                String tipo = etTipo.getText().toString(); // sempre "Entrada"
-                String dataStr = etData.getText().toString();
-                Date data = null;
-                try {
-                    data = sdf.parse(dataStr);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                // Cria o objeto Transacao e adiciona no repositório
-                Transacao novaTransacao = new Transacao(0, descricao, valor, tipo, data);
-                TransacaoRepository.addTransacao(novaTransacao);
-                finish();
-            }
-        });
+        btnSalvarEntrada.setOnClickListener(view -> salvarTransacao());
     }
 
     private void showDatePickerDialog() {
@@ -89,16 +70,69 @@ public class AdicionarEntradaActivity extends AppCompatActivity {
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-                        // O mês é indexado a partir de 0
-                        String dateString = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
-                        etData.setText(dateString);
-                    }
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    String dateString = String.format(Locale.getDefault(),
+                            "%02d/%02d/%04d", selectedDay, (selectedMonth + 1), selectedYear);
+                    etData.setText(dateString);
                 },
                 year, month, day
         );
         datePickerDialog.show();
+    }
+
+    private void salvarTransacao() {
+        // Validação dos campos
+        if (etDescricao.getText().toString().trim().isEmpty()) {
+            etDescricao.setError("Informe a descrição");
+            etDescricao.requestFocus();
+            return;
+        }
+
+        if (etValor.getText().toString().trim().isEmpty()) {
+            etValor.setError("Informe o valor");
+            etValor.requestFocus();
+            return;
+        }
+
+        try {
+            double valor = Double.parseDouble(etValor.getText().toString());
+            if (valor <= 0) {
+                etValor.setError("O valor deve ser positivo");
+                etValor.requestFocus();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            etValor.setError("Valor inválido");
+            etValor.requestFocus();
+            return;
+        }
+
+        String dataStr = etData.getText().toString();
+        Date data;
+        try {
+            data = sdf.parse(dataStr);
+            if (data == null) {
+                etData.setError("Data inválida");
+                etData.requestFocus();
+                return;
+            }
+        } catch (ParseException e) {
+            etData.setError("Formato de data inválido (dd/MM/yyyy)");
+            etData.requestFocus();
+            return;
+        }
+
+        // Cria e salva a transação
+        Transacao novaTransacao = new Transacao(
+                0, // ID será gerado automaticamente
+                etDescricao.getText().toString().trim(),
+                Double.parseDouble(etValor.getText().toString()),
+                etTipo.getText().toString(),
+                data
+        );
+
+        TransacaoRepository.addTransacao(novaTransacao);
+        Toast.makeText(this, "Entrada registrada com sucesso!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

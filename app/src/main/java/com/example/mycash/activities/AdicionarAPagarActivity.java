@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -32,10 +32,10 @@ public class AdicionarAPagarActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_adicionar_apagar);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
-            return windowInsets;
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
 
         etDescricaoAPagar = findViewById(R.id.etDescricaoAPagar);
@@ -43,23 +43,61 @@ public class AdicionarAPagarActivity extends AppCompatActivity {
         etDataAPagar = findViewById(R.id.etDataAPagar);
         btnSalvarAPagar = findViewById(R.id.btnSalvarAPagar);
 
+        // Se o campo de data estiver vazio, define a data atual
+        if (etDataAPagar.getText().toString().trim().isEmpty()) {
+            etDataAPagar.setText(dateFormat.format(new Date()));
+        }
+
         etDataAPagar.setOnClickListener(view -> showDatePickerDialog());
 
-        btnSalvarAPagar.setOnClickListener(view -> {
-            try {
-                String descricao = etDescricaoAPagar.getText().toString();
-                double valor = Double.parseDouble(etValorAPagar.getText().toString());
-                String dataStr = etDataAPagar.getText().toString();
-                Date data = dateFormat.parse(dataStr);
+        btnSalvarAPagar.setOnClickListener(view -> salvarTransacao());
+    }
 
-                Transacao trans = new Transacao(0, descricao, valor, "A Pagar", data);
-                TransacaoRepository.addTransacao(trans);
+    private void salvarTransacao() {
+        String descricao = etDescricaoAPagar.getText().toString().trim();
+        String valorText = etValorAPagar.getText().toString().trim();
+        String dataStr = etDataAPagar.getText().toString().trim();
 
-            } catch (ParseException | NumberFormatException e) {
-                e.printStackTrace();
+        if (descricao.isEmpty()) {
+            etDescricaoAPagar.setError("Informe a descrição");
+            etDescricaoAPagar.requestFocus();
+            return;
+        }
+        if (valorText.isEmpty()) {
+            etValorAPagar.setError("Informe o valor");
+            etValorAPagar.requestFocus();
+            return;
+        }
+        if (dataStr.isEmpty()) {
+            etDataAPagar.setError("Selecione a data");
+            etDataAPagar.requestFocus();
+            return;
+        }
+
+        try {
+            double valor = Double.parseDouble(valorText);
+            if (valor <= 0) {
+                etValorAPagar.setError("O valor deve ser positivo");
+                etValorAPagar.requestFocus();
+                return;
             }
+            Date data = dateFormat.parse(dataStr);
+            if (data == null) {
+                etDataAPagar.setError("Data inválida");
+                etDataAPagar.requestFocus();
+                return;
+            }
+            Transacao transacao = new Transacao(0, descricao, valor, "A Pagar", data);
+            TransacaoRepository.addTransacao(transacao);
+            Toast.makeText(this, "Transação 'A Pagar' registrada!", Toast.LENGTH_SHORT).show();
             finish();
-        });
+        } catch (NumberFormatException e) {
+            etValorAPagar.setError("Valor inválido");
+            etValorAPagar.requestFocus();
+        } catch (ParseException e) {
+            etDataAPagar.setError("Formato de data inválido (dd/MM/yyyy)");
+            etDataAPagar.requestFocus();
+        }
     }
 
     private void showDatePickerDialog() {
@@ -73,9 +111,9 @@ public class AdicionarAPagarActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        int year  = calendar.get(Calendar.YEAR);
+        int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
-        int day   = calendar.get(Calendar.DAY_OF_MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,

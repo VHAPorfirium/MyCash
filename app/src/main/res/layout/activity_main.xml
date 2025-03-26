@@ -17,6 +17,7 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/black"
+        android:padding="5dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,17 +67,6 @@
 
     </GridLayout>
 
-    <!-- Botão Visualizar Estrutura Financeira -->
-    <Button
-        android:id="@+id/btnEstruturaFinanceira"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Estrutura Financeira"
-        android:layout_marginTop="30dp"
-        app:layout_constraintTop_toBottomOf="@id/gridRoundButtons"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
     <!-- CardView para exibir Crédito e Débito (layout do cartão de crédito) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardGastos"
@@ -84,7 +74,7 @@
         android:layout_height="150dp"
         android:layout_marginTop="50dp"
         app:cardCornerRadius="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnEstruturaFinanceira"
+        app:layout_constraintTop_toBottomOf="@id/gridRoundButtons"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -93,7 +83,7 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
+            android:padding="20dp"
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
@@ -171,14 +161,25 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Botão Visualizar Estrutura Financeira -->
+    <Button
+        android:id="@+id/btnEstruturaFinanceira"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Estrutura Financeira"
+        android:layout_marginTop="80dp"
+        app:layout_constraintTop_toBottomOf="@id/cardGastos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- Botão Resumo Financeiro, fixado na parte inferior -->
     <Button
         android:id="@+id/btnResumoFinanceiro"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Resumo Financeiro"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/cardGastos"
+        android:layout_marginTop="5dp"
+        app:layout_constraintTop_toBottomOf="@id/btnEstruturaFinanceira"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

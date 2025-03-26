@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -31,10 +32,10 @@ public class EditarAPagarActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_editar_apagar);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
-            return windowInsets;
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
 
         etDescricaoAPagar = findViewById(R.id.etDescricaoAPagar);
@@ -53,20 +54,50 @@ public class EditarAPagarActivity extends AppCompatActivity {
 
         etDataAPagar.setOnClickListener(v -> showDatePickerDialog());
 
-        btnSalvarEdicaoAPagar.setOnClickListener(v -> {
-            String novaDescricao = etDescricaoAPagar.getText().toString();
-            double novoValor = Double.parseDouble(etValorAPagar.getText().toString());
-            String novaDataStr = etDataAPagar.getText().toString();
-            try {
-                Date novaData = dateFormat.parse(novaDataStr);
-                transacao.setDescricao(novaDescricao);
-                transacao.setValor(novoValor);
-                transacao.setData(novaData);
-            } catch (ParseException e) {
-                e.printStackTrace();
+        btnSalvarEdicaoAPagar.setOnClickListener(v -> atualizarTransacao());
+    }
+
+    private void atualizarTransacao() {
+        String novaDescricao = etDescricaoAPagar.getText().toString().trim();
+        String valorText = etValorAPagar.getText().toString().trim();
+        String novaDataStr = etDataAPagar.getText().toString().trim();
+
+        if (novaDescricao.isEmpty()) {
+            etDescricaoAPagar.setError("Informe a descrição");
+            etDescricaoAPagar.requestFocus();
+            return;
+        }
+        if (valorText.isEmpty()) {
+            etValorAPagar.setError("Informe o valor");
+            etValorAPagar.requestFocus();
+            return;
+        }
+        if (novaDataStr.isEmpty()) {
+            etDataAPagar.setError("Selecione a data");
+            etDataAPagar.requestFocus();
+            return;
+        }
+
+        try {
+            double novoValor = Double.parseDouble(valorText);
+            Date novaData = dateFormat.parse(novaDataStr);
+            if (novaData == null) {
+                etDataAPagar.setError("Data inválida");
+                etDataAPagar.requestFocus();
+                return;
             }
+            transacao.setDescricao(novaDescricao);
+            transacao.setValor(novoValor);
+            transacao.setData(novaData);
+            Toast.makeText(this, "Transação atualizada!", Toast.LENGTH_SHORT).show();
             finish();
-        });
+        } catch (NumberFormatException e) {
+            etValorAPagar.setError("Valor inválido");
+            etValorAPagar.requestFocus();
+        } catch (ParseException e) {
+            etDataAPagar.setError("Formato de data inválido (dd/MM/yyyy)");
+            etDataAPagar.requestFocus();
+        }
     }
 
     private void showDatePickerDialog() {
@@ -80,10 +111,9 @@ public class EditarAPagarActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        int year  = calendar.get(Calendar.YEAR);
+        int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
-        int day   = calendar.get(Calendar.DAY_OF_MONTH);
-
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {

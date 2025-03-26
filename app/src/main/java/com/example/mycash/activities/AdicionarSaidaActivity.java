@@ -2,12 +2,12 @@ package com.example.mycash.activities;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -27,7 +27,7 @@ public class AdicionarSaidaActivity extends AppCompatActivity {
     private EditText etDescricao, etValor, etData;
     private Spinner spTipoSaida;
     private Button btnSalvarSaida;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +35,12 @@ public class AdicionarSaidaActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_adicionar_saida);
 
-        // Ajusta os insets para acomodar as barras do sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Vincula as views
         etDescricao = findViewById(R.id.etDescricao);
         etValor = findViewById(R.id.etValor);
         etData = findViewById(R.id.etData);
@@ -58,55 +56,81 @@ public class AdicionarSaidaActivity extends AppCompatActivity {
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spTipoSaida.setAdapter(adapterSpinner);
 
-        // Configura o campo de data para abrir um DatePickerDialog ao ser clicado
-        etData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog();
-            }
-        });
+        // Define data atual se o campo estiver vazio
+        if (etData.getText().toString().trim().isEmpty()) {
+            etData.setText(dateFormat.format(new Date()));
+        }
 
-        // Ao clicar no botão Salvar, coleta os dados, cria a saída e persiste na repository
-        btnSalvarSaida.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    String descricao = etDescricao.getText().toString();
-                    String valorText = etValor.getText().toString();
-                    // Força o valor a ser negativo, mesmo que o usuário não insira o sinal
-                    double valor = -Math.abs(Double.parseDouble(valorText));
-                    String tipo = spTipoSaida.getSelectedItem().toString();
-                    String dataStr = etData.getText().toString();
-                    Date data = dateFormat.parse(dataStr);
+        etData.setOnClickListener(view -> showDatePickerDialog());
 
-                    // Cria o objeto Transacao (id 0 para indicar novo registro; repository atribuirá o id)
-                    Transacao novaSaida = new Transacao(0, descricao, valor, tipo, data);
-                    // Salva na repository
-                    TransacaoRepository.addTransacao(novaSaida);
-                } catch (ParseException | NumberFormatException e) {
-                    e.printStackTrace();
-                    // Aqui você pode exibir um erro para o usuário se a data ou o valor forem inválidos
-                }
-                finish(); // Fecha a Activity após salvar
-            }
-        });
+        btnSalvarSaida.setOnClickListener(view -> salvarSaida());
     }
 
-    // Exibe um DatePickerDialog para seleção da data
+    private void salvarSaida() {
+        String descricao = etDescricao.getText().toString().trim();
+        String valorText = etValor.getText().toString().trim();
+        String dataStr = etData.getText().toString().trim();
+        String tipo = spTipoSaida.getSelectedItem().toString();
+
+        if (descricao.isEmpty()) {
+            etDescricao.setError("Informe a descrição");
+            etDescricao.requestFocus();
+            return;
+        }
+        if (valorText.isEmpty()) {
+            etValor.setError("Informe o valor");
+            etValor.requestFocus();
+            return;
+        }
+        if (dataStr.isEmpty()) {
+            etData.setError("Selecione a data");
+            etData.requestFocus();
+            return;
+        }
+
+        try {
+            // Força o valor a ser negativo
+            double valor = -Math.abs(Double.parseDouble(valorText));
+            Date data = dateFormat.parse(dataStr);
+            if (data == null) {
+                etData.setError("Data inválida");
+                etData.requestFocus();
+                return;
+            }
+            Transacao novaSaida = new Transacao(0, descricao, valor, tipo, data);
+            TransacaoRepository.addTransacao(novaSaida);
+            Toast.makeText(this, "Saída registrada com sucesso!", Toast.LENGTH_SHORT).show();
+            finish();
+        } catch (NumberFormatException e) {
+            etValor.setError("Valor inválido");
+            etValor.requestFocus();
+        } catch (ParseException e) {
+            etData.setError("Formato de data inválido (dd/MM/yyyy)");
+            etData.requestFocus();
+        }
+    }
+
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
-        int year  = calendar.get(Calendar.YEAR);
+        String currentDateStr = etData.getText().toString();
+        if (!currentDateStr.isEmpty()) {
+            try {
+                Date currentDate = dateFormat.parse(currentDateStr);
+                calendar.setTime(currentDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
-        int day   = calendar.get(Calendar.DAY_OF_MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-                        // Lembre-se: o mês é indexado em 0 (janeiro = 0)
-                        String dateString = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
-                        etData.setText(dateString);
-                    }
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    String dateString = String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                            selectedDay, selectedMonth + 1, selectedYear);
+                    etData.setText(dateString);
                 },
                 year, month, day
         );

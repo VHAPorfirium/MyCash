@@ -3,5 +3,7 @@
     <string-array name="array_tipo_saida">
         <item>Crédito</item>
         <item>Débito</item>
+        <item>Pix</item>
+        <item>Dinheiro</item>
     </string-array>
 </resources>

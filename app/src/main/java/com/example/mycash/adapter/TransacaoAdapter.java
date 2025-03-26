@@ -8,7 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.mycash.R;
 import com.example.mycash.model.Transacao;
+
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.ViewHolder> {
 
@@ -38,9 +41,14 @@ public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transacao transacao = transacaoList.get(position);
+
+        // Configuração do formato de data
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
         holder.tvDescricao.setText(transacao.getDescricao());
-        holder.tvValor.setText("R$ " + transacao.getValor());
+        holder.tvValor.setText(String.format("R$ %.2f", transacao.getValor()));
         holder.tvTipo.setText(transacao.getTipo());
+        holder.tvData.setText(sdf.format(transacao.getData()));
 
         holder.itemView.setOnClickListener(v -> {
             if(listener != null) {
@@ -49,18 +57,20 @@ public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.View
         });
     }
 
+
     @Override
     public int getItemCount() {
         return transacaoList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDescricao, tvValor, tvTipo;
+        TextView tvDescricao, tvValor, tvTipo, tvData;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDescricao = itemView.findViewById(R.id.tvDescricao);
             tvValor = itemView.findViewById(R.id.tvValor);
             tvTipo = itemView.findViewById(R.id.tvTipo);
+            tvData = itemView.findViewById(R.id.tvData);
         }
     }
 }

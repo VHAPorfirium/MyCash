@@ -2,11 +2,12 @@ package com.example.mycash.activities;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -27,21 +28,21 @@ public class EditarSaidaActivity extends AppCompatActivity {
     private RadioGroup rgTipoSaida;
     private RadioButton rbCreditoSaida, rbDebitoSaida;
     private Button btnSalvarEdicaoSaida;
-    private Transacao transacao; // Objeto que será editado
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private Transacao transacao;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_editar_saida);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Vincula as views
         etDescricaoSaida = findViewById(R.id.etDescricaoSaida);
         etValorSaida = findViewById(R.id.etValorSaida);
         etDataSaida = findViewById(R.id.etDataSaida);
@@ -50,81 +51,97 @@ public class EditarSaidaActivity extends AppCompatActivity {
         rbDebitoSaida = findViewById(R.id.rbDebitoSaida);
         btnSalvarEdicaoSaida = findViewById(R.id.btnSalvarEdicaoSaida);
 
-        // Recupera o ID da transação a partir do Intent e carrega os dados da repository
         int transacaoId = getIntent().getIntExtra("transacao_id", -1);
         transacao = TransacaoRepository.getTransacaoById(transacaoId);
 
         if (transacao != null) {
             etDescricaoSaida.setText(transacao.getDescricao());
-            // Garante que o valor seja negativo; exibe valor absoluto para edição
-            String valorStr = String.valueOf(Math.abs(transacao.getValor()));
-            etValorSaida.setText(valorStr);
-            // Seleciona o RadioButton de acordo com o tipo salvo ("Crédito" ou "Débito")
+            // Exibe o valor como absoluto para edição
+            etValorSaida.setText(String.valueOf(Math.abs(transacao.getValor())));
             if ("Crédito".equalsIgnoreCase(transacao.getTipo())) {
                 rbCreditoSaida.setChecked(true);
             } else if ("Débito".equalsIgnoreCase(transacao.getTipo())) {
                 rbDebitoSaida.setChecked(true);
             }
-            // Preenche o campo de data
-            String dateString = dateFormat.format(transacao.getData());
-            etDataSaida.setText(dateString);
+            etDataSaida.setText(dateFormat.format(transacao.getData()));
         }
 
-        // Configura o campo de data para abrir um DatePickerDialog
-        etDataSaida.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDatePickerDialog();
+        etDataSaida.setOnClickListener(v -> showDatePickerDialog());
+
+        btnSalvarEdicaoSaida.setOnClickListener(v -> atualizarTransacao());
+    }
+
+    private void atualizarTransacao() {
+        String novaDescricao = etDescricaoSaida.getText().toString().trim();
+        String valorText = etValorSaida.getText().toString().trim();
+        String novaDataStr = etDataSaida.getText().toString().trim();
+
+        if (novaDescricao.isEmpty()) {
+            etDescricaoSaida.setError("Informe a descrição");
+            etDescricaoSaida.requestFocus();
+            return;
+        }
+        if (valorText.isEmpty()) {
+            etValorSaida.setError("Informe o valor");
+            etValorSaida.requestFocus();
+            return;
+        }
+        if (novaDataStr.isEmpty()) {
+            etDataSaida.setError("Selecione a data");
+            etDataSaida.requestFocus();
+            return;
+        }
+
+        try {
+            // Garante que o valor seja negativo
+            double novoValor = -Math.abs(Double.parseDouble(valorText));
+            int selectedId = rgTipoSaida.getCheckedRadioButtonId();
+            String novoTipo = "";
+            if (selectedId == rbCreditoSaida.getId()) {
+                novoTipo = "Crédito";
+            } else if (selectedId == rbDebitoSaida.getId()) {
+                novoTipo = "Débito";
             }
-        });
-
-        // Configura o clique do botão Salvar
-        btnSalvarEdicaoSaida.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String novaDescricao = etDescricaoSaida.getText().toString();
-                String valorTexto = etValorSaida.getText().toString();
-                // Garante que o valor possua sinal negativo
-                double novoValor = -Math.abs(Double.parseDouble(valorTexto));
-                // Obtém o tipo selecionado no RadioGroup
-                String novoTipo = "";
-                int selectedId = rgTipoSaida.getCheckedRadioButtonId();
-                if (selectedId == rbCreditoSaida.getId()) {
-                    novoTipo = "Crédito";
-                } else if (selectedId == rbDebitoSaida.getId()) {
-                    novoTipo = "Débito";
-                }
-                String novaDataStr = etDataSaida.getText().toString();
-                Date novaData = null;
-                try {
-                    novaData = dateFormat.parse(novaDataStr);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                // Atualiza o objeto transacao e, se necessário, salve as alterações na repository
-                transacao.setDescricao(novaDescricao);
-                transacao.setValor(novoValor);
-                transacao.setTipo(novoTipo);
-                if (novaData != null) {
-                    transacao.setData(novaData);
-                }
-                // Em uma implementação real, você pode chamar um método update na repository
-
-                finish();
+            Date novaData = dateFormat.parse(novaDataStr);
+            if (novaData == null) {
+                etDataSaida.setError("Data inválida");
+                etDataSaida.requestFocus();
+                return;
             }
-        });
+            transacao.setDescricao(novaDescricao);
+            transacao.setValor(novoValor);
+            transacao.setTipo(novoTipo);
+            transacao.setData(novaData);
+            Toast.makeText(this, "Saída atualizada!", Toast.LENGTH_SHORT).show();
+            finish();
+        } catch (NumberFormatException e) {
+            etValorSaida.setError("Valor inválido");
+            etValorSaida.requestFocus();
+        } catch (ParseException e) {
+            etDataSaida.setError("Formato de data inválido (dd/MM/yyyy)");
+            etDataSaida.requestFocus();
+        }
     }
 
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
-        int year  = calendar.get(Calendar.YEAR);
+        String currentDateStr = etDataSaida.getText().toString();
+        if (!currentDateStr.isEmpty()) {
+            try {
+                Date currentDate = dateFormat.parse(currentDateStr);
+                calendar.setTime(currentDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
-        int day   = calendar.get(Calendar.DAY_OF_MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String dateString = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                    String dateString = String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                            selectedDay, selectedMonth + 1, selectedYear);
                     etDataSaida.setText(dateString);
                 },
                 year, month, day
