@@ -1,187 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/colorPrimaryVariant">
+    android:background="@color/colorBackground">
 
-    <!-- Título do App no Topo -->
-    <TextView
-        android:id="@+id/tvAppTitle"
-        android:layout_width="0dp"
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="MyCash"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:padding="5dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <!-- GridLayout com os 3 botões redondos -->
-    <GridLayout
-        android:id="@+id/gridRoundButtons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="1"
-        android:layout_marginTop="30dp"
-        app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Botão: Entradas -->
-        <Button
-            android:id="@+id/btnEntradas"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Entradas"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-        <!-- Botão: Saídas -->
-        <Button
-            android:id="@+id/btnSaidas"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Saídas"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-        <!-- Botão: A Pagar -->
-        <Button
-            android:id="@+id/btnAPagar"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="A Pagar"
-            android:textSize="12sp"
-            android:background="@drawable/round_button"
-            android:layout_margin="8dp"/>
-
-    </GridLayout>
-
-    <!-- CardView para exibir Crédito e Débito (layout do cartão de crédito) -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardGastos"
-        android:layout_width="0dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="50dp"
-        app:cardCornerRadius="16dp"
-        app:layout_constraintTop_toBottomOf="@id/gridRoundButtons"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Layout interno do CardView -->
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="20dp"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:title="MyCash"
+            app:titleTextColor="@android:color/white"
+            app:menu="@menu/menu_main"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <!-- Título "Gastos:" centralizado -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Botões Nova Entrada/Saída -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/btnNovaEntrada"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Nova Entrada"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/verde_entrada"
+                    android:textAllCaps="false"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+                <Button
+                    android:id="@+id/btnNovaSaida"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Nova Saída"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/vermelho_saida"
+                    android:textAllCaps="false"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            </LinearLayout>
+
+            <!-- Card Saldo -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardSaldo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Saldo Atual"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/tvSaldo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="R$ 0,00"
+                        android:textSize="28sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Resumo Financeiro -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="3"
+                    android:rowCount="1"
+                    android:padding="8dp">
+
+                    <!-- Entradas -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Entradas"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/tvEntradas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="R$ 0,00"
+                            android:textColor="@color/verde_entrada"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <!-- Saídas -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Saídas"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/tvSaidas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="R$ 0,00"
+                            android:textColor="@color/vermelho_saida"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <!-- A Pagar -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="A Pagar"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/tvAPagar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="R$ 0,00"
+                            android:textColor="@color/vermelho_saida"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </GridLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Título Transações -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Gastos:"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="8dp"
+                android:text="Últimas Transações"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
 
-            <!-- Container horizontal para as duas colunas -->
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- Lista de Transações -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTransacoes"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- Coluna da esquerda: Entradas e Saídas -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Entradas: R$ 0,00"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Saídas: R$ 0,00"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
-
-                <!-- Espaço entre as colunas -->
-                <Space
-                    android:layout_width="16dp"
-                    android:layout_height="wrap_content" />
-
-                <!-- Coluna da direita: Crédito e Débito -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvCredito"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Crédito: R$ 0,00"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:id="@+id/tvDebito"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Débito: R$ 0,00"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_marginBottom="72dp"
+                tools:listitem="@layout/item_transacao"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Botão Visualizar Estrutura Financeira -->
-    <Button
-        android:id="@+id/btnEstruturaFinanceira"
+    <!-- FAB para adicionar nova transação -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdicionar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Estrutura Financeira"
-        android:layout_marginTop="80dp"
-        app:layout_constraintTop_toBottomOf="@id/cardGastos"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Botão Resumo Financeiro, fixado na parte inferior -->
-    <Button
-        android:id="@+id/btnResumoFinanceiro"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Resumo Financeiro"
-        android:layout_marginTop="5dp"
-        app:layout_constraintTop_toBottomOf="@id/btnEstruturaFinanceira"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@android:color/white"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

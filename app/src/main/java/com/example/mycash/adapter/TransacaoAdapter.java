@@ -3,74 +3,86 @@ package com.example.mycash.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.mycash.R;
+import com.example.mycash.database.TransacaoRepository;
 import com.example.mycash.model.Transacao;
-
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
-public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.ViewHolder> {
+public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.TransacaoViewHolder> {
 
-    private List<Transacao> transacaoList;
-    private OnItemClickListener listener;
+    private List<Transacao> transacoes;
+    private final OnTransacaoClickListener listener;
 
-    public interface OnItemClickListener {
-        void onItemClick(Transacao transacao);
+    public interface OnTransacaoClickListener {
+        void onTransacaoClick(Transacao transacao);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
+    public TransacaoAdapter(OnTransacaoClickListener listener) {
         this.listener = listener;
     }
 
-    public TransacaoAdapter(List<Transacao> transacaoList) {
-        this.transacaoList = transacaoList;
+    public void setTransacoes(List<Transacao> transacoes) {
+        this.transacoes = transacoes;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public TransacaoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_transacao, parent, false);
-        return new ViewHolder(view);
+        return new TransacaoViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Transacao transacao = transacaoList.get(position);
-
-        // Configuração do formato de data
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-
-        holder.tvDescricao.setText(transacao.getDescricao());
-        holder.tvValor.setText(String.format("R$ %.2f", transacao.getValor()));
-        holder.tvTipo.setText(transacao.getTipo());
-        holder.tvData.setText(sdf.format(transacao.getData()));
-
-        holder.itemView.setOnClickListener(v -> {
-            if(listener != null) {
-                listener.onItemClick(transacao);
-            }
-        });
+    public void onBindViewHolder(@NonNull TransacaoViewHolder holder, int position) {
+        Transacao transacao = transacoes.get(position);
+        holder.bind(transacao, listener);
     }
-
 
     @Override
     public int getItemCount() {
-        return transacaoList.size();
+        return transacoes != null ? transacoes.size() : 0;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDescricao, tvValor, tvTipo, tvData;
-        public ViewHolder(@NonNull View itemView) {
+    static class TransacaoViewHolder extends RecyclerView.ViewHolder {
+        private final TextView tvDescricao, tvData, tvValor, tvCategoria;
+        private final ImageButton btnExcluir;
+
+        public TransacaoViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDescricao = itemView.findViewById(R.id.tvDescricao);
-            tvValor = itemView.findViewById(R.id.tvValor);
-            tvTipo = itemView.findViewById(R.id.tvTipo);
             tvData = itemView.findViewById(R.id.tvData);
+            tvValor = itemView.findViewById(R.id.tvValor);
+            tvCategoria = itemView.findViewById(R.id.tvCategoria);
+            btnExcluir = itemView.findViewById(R.id.btnExcluir);
+        }
+
+        public void bind(Transacao transacao, OnTransacaoClickListener listener) {
+            tvDescricao.setText(transacao.getDescricao());
+            tvData.setText(transacao.getDataFormatada());
+            tvValor.setText(transacao.getValorFormatado());
+            tvCategoria.setText(transacao.getCategoria());
+
+            // Cor baseada no tipo de transação
+            int color = transacao.isEntrada()
+                    ? itemView.getContext().getResources().getColor(R.color.verde_entrada)
+                    : itemView.getContext().getResources().getColor(R.color.vermelho_saida);
+
+            tvValor.setTextColor(color);
+
+            // Clique no item para editar
+            itemView.setOnClickListener(v -> listener.onTransacaoClick(transacao));
+
+            // Botão excluir
+            btnExcluir.setOnClickListener(v -> {
+                TransacaoRepository.removeTransacao(transacao);
+                listener.onTransacaoClick(null); // Notifica para atualizar
+            });
         }
     }
 }

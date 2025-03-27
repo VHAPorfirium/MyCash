@@ -2,65 +2,138 @@ package com.example.mycash.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
-import androidx.activity.EdgeToEdge;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.mycash.R;
+import com.example.mycash.adapter.TransacaoAdapter;
+import com.example.mycash.database.TransacaoRepository;
+import com.example.mycash.model.Transacao;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import java.text.NumberFormat;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnEntradas, btnSaidas, btnAPagar, btnEstruturaFinanceira, btnResumoFinanceiro;
+    private TextView tvSaldo, tvEntradas, tvSaidas, tvAPagar;
+    private RecyclerView rvTransacoes;
+    private TransacaoAdapter transacaoAdapter;
+    private NumberFormat currencyFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        currencyFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        initViews();
+        setupRecyclerView();
+        setupFloatingActionButton();
+        setupButtons();
+        updateResumo();
+    }
 
+    private void initViews() {
+        tvSaldo = findViewById(R.id.tvSaldo);
+        tvEntradas = findViewById(R.id.tvEntradas);
+        tvSaidas = findViewById(R.id.tvSaidas);
+        tvAPagar = findViewById(R.id.tvAPagar);
+        rvTransacoes = findViewById(R.id.rvTransacoes);
+    }
 
-        btnEntradas = findViewById(R.id.btnEntradas);
-        btnSaidas = findViewById(R.id.btnSaidas);
-        btnAPagar = findViewById(R.id.btnAPagar);
-        btnEstruturaFinanceira = findViewById(R.id.btnEstruturaFinanceira);
-        btnResumoFinanceiro = findViewById(R.id.btnResumoFinanceiro);
-
-        // Botão: Entradas
-        btnEntradas.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, EntradasActivity.class);
+    private void setupRecyclerView() {
+        rvTransacoes.setLayoutManager(new LinearLayoutManager(this));
+        transacaoAdapter = new TransacaoAdapter(transacao -> {
+            Intent intent = new Intent(this, GerenciarTransacaoActivity.class);
+            intent.putExtra("transacao_id", transacao.getId());
             startActivity(intent);
         });
+        rvTransacoes.setAdapter(transacaoAdapter);
+    }
 
-        // Botão: Saídas
-        btnSaidas.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, SaidasActivity.class);
+    private void setupFloatingActionButton() {
+        FloatingActionButton fab = findViewById(R.id.fabAdicionar);
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(this, GerenciarTransacaoActivity.class);
             startActivity(intent);
         });
+    }
 
-        // Botão: A Pagar
-        btnAPagar.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, APagarActivity.class);
-            startActivity(intent);
+    private void setupButtons() {
+        Button btnNovaEntrada = findViewById(R.id.btnNovaEntrada);
+        Button btnNovaSaida = findViewById(R.id.btnNovaSaida);
+
+        btnNovaEntrada.setOnClickListener(v -> {
+            startActivity(new Intent(this, AdicionarEntradaActivity.class));
         });
 
-        // Botão: Estrutura Financeira
-        btnEstruturaFinanceira.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, EstruturaFinanceiraActivity.class);
-            startActivity(intent);
+        btnNovaSaida.setOnClickListener(v -> {
+            startActivity(new Intent(this, AdicionarSaidaActivity.class));
         });
+    }
 
-        // Botão: Resumo Financeiro
-        btnResumoFinanceiro.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, ResumoFinanceiroActivity.class);
+    private void abrirGerenciadorTransacao(String tipo) {
+        try {
+            Intent intent = new Intent(MainActivity.this, GerenciarTransacaoActivity.class);
+            intent.putExtra("tipo_selecionado", tipo);
             startActivity(intent);
-        });
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro ao abrir: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
+    private void updateResumo() {
+        List<Transacao> transacoes = TransacaoRepository.getTransacoes();
+        Collections.sort(transacoes, (t1, t2) -> t2.getData().compareTo(t1.getData()));
+
+        double totalEntradas = 0;
+        double totalSaidas = 0;
+        double totalAPagar = 0;
+
+        for (Transacao t : transacoes) {
+            // Substitua por:
+            totalEntradas = TransacaoRepository.getTotalEntradas();
+            totalSaidas = TransacaoRepository.getTotalSaidas();
+            double saldo = totalEntradas - totalSaidas;
+        }
+
+        double saldo = totalEntradas - totalSaidas;
+
+        tvSaldo.setText(currencyFormat.format(saldo));
+        tvEntradas.setText(currencyFormat.format(totalEntradas));
+        tvSaidas.setText(currencyFormat.format(totalSaidas));
+        tvAPagar.setText(currencyFormat.format(totalAPagar));
+        transacaoAdapter.setTransacoes(transacoes);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateResumo();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menu_filtrar) {
+            // Implementar filtro
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

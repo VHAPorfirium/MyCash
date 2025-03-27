@@ -1,3 +1,11 @@
+<!-- res/values/strings.xml -->
 <resources>
     <string name="app_name">MyCash</string>
+    <!-- Mantenha apenas strings simples aqui -->
+    <string name="entradas">Entradas</string>
+    <string name="saidas">Saídas</string>
+    <string name="a_pagar">A Pagar</string>
+    <string name="saldo">Saldo</string>
+    <string name="menu_filtrar">Filtrar</string>
+    <!-- REMOVA os arrays daqui -->
 </resources>
