@@ -1,8 +1,16 @@
-<!-- res/values/arrays.xml -->
 <resources>
     <string-array name="tipos_transacao">
         <item>Entrada</item>
         <item>Saída</item>
+    </string-array>
+
+    <string-array name="categorias">
+        <item>Salário</item>
+        <item>Alimentação</item>
+        <item>Transporte</item>
+        <item>Lazer</item>
+        <item>Moradia</item>
+        <item>Outros</item>
     </string-array>
 
     <string-array name="formas_pagamento">
@@ -11,17 +19,5 @@
         <item>Cartão Crédito</item>
         <item>PIX</item>
         <item>Transferência</item>
-    </string-array>
-
-    <string-array name="categorias">
-        <item>Salário</item>
-        <item>Investimentos</item>
-        <item>Presente</item>
-        <item>Outros</item>
-        <item>Alimentação</item>
-        <item>Transporte</item>
-        <item>Moradia</item>
-        <item>Lazer</item>
-        <item>Saúde</item>
     </string-array>
 </resources>

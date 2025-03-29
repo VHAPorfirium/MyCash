@@ -43,6 +43,8 @@
             android:name=".activities.AdicionarSaidaActivity"
             android:exported="false"
             android:parentActivityName=".activities.MainActivity"/>
+        <activity android:name=".activities.EditarTransacaoActivity"
+            android:parentActivityName=".activities.MainActivity"/>
 
     </application>
 

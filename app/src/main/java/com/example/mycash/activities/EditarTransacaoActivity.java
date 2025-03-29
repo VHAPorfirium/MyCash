@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class GerenciarTransacaoActivity extends AppCompatActivity {
+public class EditarTransacaoActivity extends AppCompatActivity {
 
     // Componentes da UI
     private EditText etDescricao, etValor, etData;
@@ -29,18 +29,23 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
     private CheckBox cbAPagar;
     private Button btnSalvar;
 
-    // Dados da transação
-    private Transacao transacaoEditada;
-    private boolean isEdicao = false;
+    // Transação sendo editada
+    private Transacao transacao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gerenciar_transacao);
+        setContentView(R.layout.activity_editar_transacao);
+
+        // Configura botão de voltar na ActionBar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         inicializarComponentes();
+        carregarTransacao();
         configurarSpinners();
-        verificarModoEdicao();
+        preencherCampos();
         configurarListeners();
     }
 
@@ -54,9 +59,21 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
         spFormaPagamento = findViewById(R.id.spFormaPagamento);
         cbAPagar = findViewById(R.id.cbAPagar);
         btnSalvar = findViewById(R.id.btnSalvar);
+    }
 
-        // Data padrão = hoje
-        etData.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()));
+    private void carregarTransacao() {
+        int transacaoId = getIntent().getIntExtra("transacao_id", -1);
+        if (transacaoId == -1) {
+            Toast.makeText(this, "Transação inválida", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        transacao = TransacaoRepository.getTransacaoById(transacaoId);
+        if (transacao == null) {
+            Toast.makeText(this, "Transação não encontrada", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void configurarSpinners() {
@@ -65,6 +82,7 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
                 this, R.array.tipos_transacao, android.R.layout.simple_spinner_item);
         tipoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spTipo.setAdapter(tipoAdapter);
+        spTipo.setEnabled(false); // Bloqueia edição do tipo
 
         // Configura spinner de categoria
         ArrayAdapter<CharSequence> categoriaAdapter = ArrayAdapter.createFromResource(
@@ -78,60 +96,27 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
         pagamentoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spFormaPagamento.setAdapter(pagamentoAdapter);
 
-        // Listener para mostrar/ocultar campos de saída
-        spTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                boolean isSaida = parent.getItemAtPosition(pos).toString().equals("Saída");
-                findViewById(R.id.layoutSaida).setVisibility(isSaida ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        // Mostra/oculta campos de saída conforme o tipo
+        atualizarVisibilidadeCamposSaida();
     }
 
-    private void verificarModoEdicao() {
-        int transacaoId = getIntent().getIntExtra("transacao_id", -1);
-        if (transacaoId != -1) {
-            transacaoEditada = TransacaoRepository.getTransacaoById(transacaoId);
-            if (transacaoEditada != null) {
-                isEdicao = true;
-                preencherCamposEdicao();
-                setTitle("Editar Transação");
-                return;
-            }
-        }
-        setTitle("Nova Transação");
+    private void preencherCampos() {
+        if (transacao == null) return;
 
-        // Se veio de um botão específico, bloqueia o tipo
-        String tipoSelecionado = getIntent().getStringExtra("tipo_selecionado");
-        if (tipoSelecionado != null) {
-            for (int i = 0; i < spTipo.getCount(); i++) {
-                if (spTipo.getItemAtPosition(i).toString().equals(tipoSelecionado)) {
-                    spTipo.setSelection(i);
-                    spTipo.setEnabled(false);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void preencherCamposEdicao() {
-        etDescricao.setText(transacaoEditada.getDescricao());
-        etValor.setText(String.valueOf(Math.abs(transacaoEditada.getValor())));
-        etData.setText(transacaoEditada.getDataFormatada());
+        etDescricao.setText(transacao.getDescricao());
+        etValor.setText(String.valueOf(Math.abs(transacao.getValor())));
+        etData.setText(transacao.getDataFormatada());
 
         // Seleciona os valores nos spinners
-        selecionarSpinner(spTipo, transacaoEditada.getTipo());
-        selecionarSpinner(spCategoria, transacaoEditada.getCategoria());
+        selecionarSpinner(spTipo, transacao.getTipo());
+        selecionarSpinner(spCategoria, transacao.getCategoria());
 
-        if (transacaoEditada.getFormaPagamento() != null) {
-            selecionarSpinner(spFormaPagamento, transacaoEditada.getFormaPagamento());
+        if (transacao.getFormaPagamento() != null) {
+            selecionarSpinner(spFormaPagamento, transacao.getFormaPagamento());
         }
 
-        if (transacaoEditada.isSaida()) {
-            cbAPagar.setChecked("A Pagar".equals(transacaoEditada.getCategoria()));
+        if (transacao.isSaida()) {
+            cbAPagar.setChecked("A Pagar".equals(transacao.getCategoria()));
         }
     }
 
@@ -149,7 +134,23 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
         etData.setOnClickListener(v -> mostrarDatePicker());
 
         // Botão salvar
-        btnSalvar.setOnClickListener(v -> salvarTransacao());
+        btnSalvar.setOnClickListener(v -> salvarEdicao());
+
+        // Listener para tipo (só para atualizar UI)
+        spTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                atualizarVisibilidadeCamposSaida();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void atualizarVisibilidadeCamposSaida() {
+        boolean isSaida = spTipo.getSelectedItem().toString().equals("Saída");
+        findViewById(R.id.layoutSaida).setVisibility(isSaida ? View.VISIBLE : View.GONE);
     }
 
     private void mostrarDatePicker() {
@@ -166,47 +167,30 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
         datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
     }
 
-    private void salvarTransacao() {
+    private void salvarEdicao() {
         try {
             // Validação dos campos
             if (!validarCampos()) {
                 return;
             }
 
-            // Obter valores dos campos
-            String descricao = etDescricao.getText().toString().trim();
-            double valor = Double.parseDouble(etValor.getText().toString());
-            Date data = parseDate(etData.getText().toString());
-            String tipo = spTipo.getSelectedItem().toString();
-            String categoria = spCategoria.getSelectedItem().toString();
+            // Atualiza os dados da transação
+            transacao.setDescricao(etDescricao.getText().toString().trim());
+            transacao.setValor(Double.parseDouble(etValor.getText().toString()) * (transacao.isEntrada() ? 1 : -1));
+            transacao.setCategoria(spCategoria.getSelectedItem().toString());
+            transacao.setData(parseDate(etData.getText().toString()));
 
-            // Criar/atualizar transação
-            Transacao transacao = isEdicao ? transacaoEditada : new Transacao();
-            transacao.setDescricao(descricao);
-            transacao.setValor(tipo.equals("Entrada") ? valor : -valor);
-            transacao.setTipo(tipo);
-            transacao.setCategoria(categoria);
-            transacao.setData(data);
-
-            // Configurações específicas para saídas
-            if (tipo.equals("Saída")) {
-                String formaPagamento = spFormaPagamento.getSelectedItem().toString();
-                transacao.setFormaPagamento(formaPagamento);
-
+            // Atualiza campos específicos de saída
+            if (transacao.isSaida()) {
+                transacao.setFormaPagamento(spFormaPagamento.getSelectedItem().toString());
                 if (cbAPagar.isChecked()) {
                     transacao.setCategoria("A Pagar");
                 }
             }
 
-            // Salvar no repositório
-            if (isEdicao) {
-                TransacaoRepository.atualizarTransacao(transacao);
-                Toast.makeText(this, "Transação atualizada com sucesso!", Toast.LENGTH_SHORT).show();
-            } else {
-                TransacaoRepository.addTransacao(transacao);
-                Toast.makeText(this, "Transação cadastrada com sucesso!", Toast.LENGTH_SHORT).show();
-            }
-
+            // Salva no repositório
+            TransacaoRepository.atualizarTransacao(transacao);
+            Toast.makeText(this, "Transação atualizada com sucesso!", Toast.LENGTH_SHORT).show();
             finish();
 
         } catch (NumberFormatException e) {
@@ -248,5 +232,11 @@ public class GerenciarTransacaoActivity extends AppCompatActivity {
 
     private Date parseDate(String dateStr) throws ParseException {
         return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(dateStr);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

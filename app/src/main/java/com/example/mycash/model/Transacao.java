@@ -56,11 +56,11 @@ public class Transacao {
     }
 
     public boolean isEntrada() {
-        return tipo != null && tipo.equalsIgnoreCase("Entrada");
+        return "Entrada".equalsIgnoreCase(tipo) || valor > 0;
     }
 
     public boolean isSaida() {
-        return tipo != null && tipo.equalsIgnoreCase("Saída");
+        return "Saída".equalsIgnoreCase(tipo) || valor < 0;
     }
 
     public boolean isCredito() {

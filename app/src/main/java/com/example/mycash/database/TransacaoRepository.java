@@ -27,16 +27,19 @@ public class TransacaoRepository {
     }
 
     public static void removeTransacao(Transacao transacao) {
-        transacoes.remove(transacao);
+        if (transacao != null) {
+            transacoes.removeIf(t -> t.getId() == transacao.getId());
+        }
     }
 
-    public static void atualizarTransacao(Transacao transacaoAtualizada) {
+    public static void atualizarTransacao(Transacao transacao) {
         for (int i = 0; i < transacoes.size(); i++) {
-            if (transacoes.get(i).getId() == transacaoAtualizada.getId()) {
-                transacoes.set(i, transacaoAtualizada);
-                break;
+            if (transacoes.get(i).getId() == transacao.getId()) {
+                transacoes.set(i, transacao);
+                return;
             }
         }
+        addTransacao(transacao); // Se não encontrou, adiciona como nova
     }
 
     // Substitua os métodos existentes por:
