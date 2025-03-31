@@ -1,6 +1,5 @@
 package com.example.mycash.adapter;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -12,8 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.mycash.R;
 import com.example.mycash.activities.EditarTransacaoActivity;
-import com.example.mycash.activities.GerenciarTransacaoActivity;
-import com.example.mycash.database.TransacaoRepository;
+import com.example.mycash.database.TransacaoDAO;
 import com.example.mycash.model.Transacao;
 import java.util.List;
 
@@ -73,27 +71,25 @@ public class TransacaoAdapter extends RecyclerView.Adapter<TransacaoAdapter.Tran
             tvValor.setText(transacao.getValorFormatado());
             tvCategoria.setText(transacao.getCategoria());
 
-            // Cor baseada no tipo de transação
             int color = transacao.isEntrada()
                     ? itemView.getContext().getResources().getColor(R.color.verde_entrada)
                     : itemView.getContext().getResources().getColor(R.color.vermelho_saida);
             tvValor.setTextColor(color);
 
-            // Clique no item para editar
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), EditarTransacaoActivity.class);
                 intent.putExtra("transacao_id", transacao.getId());
                 itemView.getContext().startActivity(intent);
             });
 
-            // Botão excluir
             btnExcluir.setOnClickListener(v -> {
-                AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
-                builder.setTitle("Confirmar exclusão")
+                new AlertDialog.Builder(itemView.getContext())
+                        .setTitle("Confirmar exclusão")
                         .setMessage("Deseja realmente excluir esta transação?")
                         .setPositiveButton("Excluir", (dialog, which) -> {
-                            TransacaoRepository.removeTransacao(transacao);
-                            listener.onTransacaoClick(null); // Notifica a Activity para atualizar
+                            TransacaoDAO dao = new TransacaoDAO(itemView.getContext());
+                            dao.deleteTransacao(transacao.getId());
+                            listener.onTransacaoClick(null); // Notifica a Activity para atualizar a lista
                         })
                         .setNegativeButton("Cancelar", null)
                         .show();

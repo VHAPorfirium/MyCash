@@ -6,13 +6,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.mycash.R;
-import com.example.mycash.database.TransacaoRepository;
+import com.example.mycash.database.TransacaoDAO;
 import com.example.mycash.model.Transacao;
-
 import java.util.Date;
 
 public class AdicionarSaidaActivity extends AppCompatActivity {
@@ -31,7 +28,6 @@ public class AdicionarSaidaActivity extends AppCompatActivity {
         spFormaPagamento = findViewById(R.id.spFormaPagamento);
         btnSalvar = findViewById(R.id.btnSalvar);
 
-        // Configurar spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.formas_pagamento, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -46,13 +42,15 @@ public class AdicionarSaidaActivity extends AppCompatActivity {
         String formaPagamento = spFormaPagamento.getSelectedItem().toString();
 
         Transacao saida = new Transacao();
-        saida.setTipo("SAIDA");
+        saida.setTipo("Saída");
         saida.setDescricao(descricao);
-        saida.setValor(-valor); // Valor negativo para saídas
+        saida.setValor(-valor); // Valores negativos para saídas
         saida.setFormaPagamento(formaPagamento);
         saida.setData(new Date());
 
-        TransacaoRepository.addTransacao(saida);
+        TransacaoDAO dao = new TransacaoDAO(this);
+        long novoId = dao.addTransacao(saida);
+        saida.setId((int) novoId);
         Toast.makeText(this, "Saída registrada!", Toast.LENGTH_SHORT).show();
         finish();
     }

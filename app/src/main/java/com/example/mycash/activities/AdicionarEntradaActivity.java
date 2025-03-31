@@ -4,13 +4,10 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.mycash.R;
-import com.example.mycash.database.TransacaoRepository;
+import com.example.mycash.database.TransacaoDAO;
 import com.example.mycash.model.Transacao;
-
 import java.util.Date;
 
 public class AdicionarEntradaActivity extends AppCompatActivity {
@@ -35,12 +32,14 @@ public class AdicionarEntradaActivity extends AppCompatActivity {
         double valor = Double.parseDouble(etValor.getText().toString());
 
         Transacao entrada = new Transacao();
-        entrada.setTipo("ENTRADA");
+        entrada.setTipo("Entrada");
         entrada.setDescricao(descricao);
         entrada.setValor(valor);
         entrada.setData(new Date());
 
-        TransacaoRepository.addTransacao(entrada);
+        TransacaoDAO dao = new TransacaoDAO(this);
+        long novoId = dao.addTransacao(entrada);
+        entrada.setId((int) novoId);
         Toast.makeText(this, "Entrada adicionada!", Toast.LENGTH_SHORT).show();
         finish();
     }
